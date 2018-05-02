@@ -1,0 +1,8 @@
+/usr/bin/luk-cli		--	gen_context(system_u:object_r:luk_exec_t,s0)
+/usr/sbin/lukd		--	gen_context(system_u:object_r:luk_exec_t,s0)
+/usr/lib(64)?/luk/lukd		--	gen_context(system_u:object_r:luk_exec_t,s0)
+
+/etc/luk(/.*)?		gen_context(system_u:object_r:luk_conf_t,s0)
+/var/lib/luk(/.*)?		gen_context(system_u:object_r:luk_var_lib_t,s0)
+
+(/var)?/run/lukd(/.*)?   gen_context(system_u:object_r:luk_var_run_t,s0)

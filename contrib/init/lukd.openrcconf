@@ -1,0 +1,33 @@
+# /etc/conf.d/lukd: config file for /etc/init.d/lukd
+
+# Config file location
+#LUKD_CONFIGFILE="/etc/luk/luk.conf"
+
+# What directory to write pidfile to?  (created and owned by $LUKD_USER)
+#LUKD_PIDDIR="/var/run/lukd"
+
+# What filename to give the pidfile
+#LUKD_PIDFILE="${LUKD_PIDDIR}/lukd.pid"
+
+# Where to write lukd data (be mindful that the blockchain is large)
+#LUKD_DATADIR="/var/lib/lukd"
+
+# User and group to own lukd process
+#LUKD_USER="luk"
+#LUKD_GROUP="luk"
+
+# Path to lukd executable
+#LUKD_BIN="/usr/bin/lukd"
+
+# Nice value to run lukd under
+#LUKD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#LUKD_OPTS=""
+
+# The timeout in seconds OpenRC will wait for lukd to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+LUKD_SIGTERM_TIMEOUT=60

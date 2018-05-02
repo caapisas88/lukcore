@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Luk Core
+Comment=Connect to the Luk P2P Network
+Comment[de]=Verbinde mit dem Luk peer-to-peer Netzwerk
+Comment[fr]=Luk, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Luk, eşten eşe kriptografik sanal para birimi
+Exec=luk-qt %u
+Terminal=false
+Type=Application
+Icon=luk128
+MimeType=x-scheme-handler/luk;
+Categories=Office;Finance;

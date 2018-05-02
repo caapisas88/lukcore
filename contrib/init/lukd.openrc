@@ -1,0 +1,92 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/luk/.luk" ]; then
+	LUKD_DEFAULT_DATADIR="/var/lib/luk/.luk"
+else
+	LUKD_DEFAULT_DATADIR="/var/lib/lukd"
+fi
+
+LUKD_CONFIGFILE=${LUKD_CONFIGFILE:-/etc/luk/luk.conf}
+LUKD_PIDDIR=${LUKD_PIDDIR:-/var/run/lukd}
+LUKD_PIDFILE=${LUKD_PIDFILE:-${LUKD_PIDDIR}/lukd.pid}
+LUKD_DATADIR=${LUKD_DATADIR:-${LUKD_DEFAULT_DATADIR}}
+LUKD_USER=${LUKD_USER:-${LUK_USER:-luk}}
+LUKD_GROUP=${LUKD_GROUP:-luk}
+LUKD_BIN=${LUKD_BIN:-/usr/bin/lukd}
+LUKD_NICE=${LUKD_NICE:-${NICELEVEL:-0}}
+LUKD_OPTS="${LUKD_OPTS:-${LUK_OPTS}}"
+
+name="Luk Core Daemon"
+description="Luk cryptocurrency P2P network daemon"
+
+command="/usr/bin/lukd"
+command_args="-pid=\"${LUKD_PIDFILE}\" \
+		-conf=\"${LUKD_CONFIGFILE}\" \
+		-datadir=\"${LUKD_DATADIR}\" \
+		-daemon \
+		${LUKD_OPTS}"
+
+required_files="${LUKD_CONFIGFILE}"
+start_stop_daemon_args="-u ${LUKD_USER} \
+			-N ${LUKD_NICE} -w 2000"
+pidfile="${LUKD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${LUKD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${LUKD_USER}:${LUKD_GROUP}" \
+	"${LUKD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${LUKD_USER}:${LUKD_GROUP}" \
+	"${LUKD_PIDDIR}"
+
+	checkpath -f \
+	-o ${LUKD_USER}:${LUKD_GROUP} \
+	-m 0660 \
+	${LUKD_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${LUKD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run lukd."
+		eerror "The setting must appear in ${LUKD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following"
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is also recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Luk Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

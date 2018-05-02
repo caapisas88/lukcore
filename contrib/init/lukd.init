@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+#  lukd The luk core server.
+#
+#
+# chkconfig: 345 80 20
+# description: lukd
+# processname: lukd
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# you can override defaults in /etc/sysconfig/lukd, see below
+if [ -f /etc/sysconfig/lukd ]; then
+        . /etc/sysconfig/lukd
+fi
+
+RETVAL=0
+
+prog=lukd
+# you can override the lockfile via LUKD_LOCKFILE in /etc/sysconfig/lukd
+lockfile=${LUKD_LOCKFILE-/var/lock/subsys/lukd}
+
+# lukd defaults to /usr/bin/lukd, override with LUKD_BIN
+lukd=${LUKD_BIN-/usr/bin/lukd}
+
+# lukd opts default to -disablewallet, override with LUKD_OPTS
+lukd_opts=${LUKD_OPTS--disablewallet}
+
+start() {
+    echo -n $"Starting $prog: "
+    daemon $DAEMONOPTS $lukd $lukd_opts
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status $prog
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: service $prog {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
